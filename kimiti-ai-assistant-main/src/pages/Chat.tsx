@@ -23,12 +23,10 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
   const handleSend = async () => {
@@ -85,7 +83,7 @@ const Chat = () => {
 
       {/* Chat Area */}
       <div className="flex-1 container mx-auto px-4 py-6 flex flex-col max-w-4xl">
-        <ScrollArea className="flex-1 pr-4" ref={scrollRef as any}>
+        <ScrollArea className="flex-1 pr-4">
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div
@@ -111,6 +109,7 @@ const Chat = () => {
                 )}
               </div>
             ))}
+            <div ref={endRef} />
           </div>
         </ScrollArea>
 

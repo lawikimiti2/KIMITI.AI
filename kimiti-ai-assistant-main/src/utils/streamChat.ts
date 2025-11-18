@@ -86,7 +86,11 @@ export async function streamChat({
           const parsed = JSON.parse(jsonStr);
           const content = parsed.choices?.[0]?.delta?.content as string | undefined;
           if (content) onDelta(content);
-        } catch {}
+        } catch (e) {
+          // Swallow malformed SSE chunk; continue processing the stream
+          // Optionally log for diagnostics without breaking the stream
+          console.warn("Non-JSON SSE line skipped", e);
+        }
       }
     }
 
