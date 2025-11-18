@@ -230,6 +230,25 @@ jobs:
         run: |
           alembic upgrade head
 
+      - name: Smoke test API (start + healthz)
+        working-directory: backend
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend
+          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/kimiti
+          VECTOR_BACKEND: pgvector
+        run: |
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 & echo $! > server.pid
+          for i in {1..40}; do
+            if curl -fsS http://localhost:8000/healthz >/dev/null; then
+              echo "healthz OK"; break
+            fi
+            sleep 1
+          done
+          if ! curl -fsS http://localhost:8000/healthz >/dev/null; then
+            echo "healthz failed"; cat server.pid | xargs -r kill; exit 1
+          fi
+          cat server.pid | xargs -r kill
+
       - name: Run integration tests
         env:
           VECTOR_BACKEND: pgvector
